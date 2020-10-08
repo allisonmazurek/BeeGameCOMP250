@@ -15,11 +15,9 @@ public class RandomSwarm extends Random {
     public SwarmOfHornets nextSwarm(){
         SwarmOfHornets swarm = new SwarmOfHornets();
         Hornet hornet;
-        Tile t = new Tile();
-        t.buildNest();
         int r = nextInt(10);
         for (int i = 0; i < r; i++){
-            swarm.addHornet(randomBees.nextHornet(t));
+            swarm.addHornet(randomBees.nextHornet(BeeGameGUI.nestTile));
         }
         return swarm;
     }

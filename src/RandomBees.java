@@ -41,11 +41,11 @@ public class RandomBees extends Random {
     }
 
     public TankyBee nextTankyBee(Tile input) {
-        return new TankyBee(input, nextInt(10), nextInt(40));//TODO: Check negatives
+        return new TankyBee(input, nextInt(10), nextInt(40)); //TODO: Check negatives
     }
 
     public Hornet nextHornet(Tile input) {
-        return new Hornet(input, nextInt(25), nextInt(15));//TODO: Check negatives
+        return new Hornet(input, nextInt(25), nextInt(15)); //TODO: Check negatives
     }
 
 }
