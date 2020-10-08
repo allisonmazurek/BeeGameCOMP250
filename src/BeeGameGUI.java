@@ -94,17 +94,6 @@ public class BeeGameGUI {
         int nestX = n;
         int nestY = n;
 
-
-//        for (int i = 0; i <= 4; i++) {
-//            tileList.add(tile[i][nestY]);
-//            buttonList.add(buttons[i][nestY]);
-//
-//        }
-//        for (int i = 1 + 1; i <= 5; i++) {
-//            tileList.add(tile[4][i]);
-//            buttonList.add(buttons[4][i]);
-//        }
-
         Image imageHive = ImageIO.read(new File("src/hive.bmp"));
         imageHive = imageHive.getScaledInstance(40, 40, 1);
 
@@ -119,28 +108,16 @@ public class BeeGameGUI {
                 if (i == nestX && j == nestY) {
                     nestTile = tile[i][j];
                     nestTile.buildNest();
-//                    System.out.println(tile[i][j] + "\n"
-//                            + "Toward the hive: + " + tile[i][j].towardTheHive() + "\n"
-//                            + "Toward the nest: " + tile[i][j].towardTheNest() + "\n"
-//                            + "Is nest: " + tile[i][j].isNest());
                     buttons[i][j].setIcon(new ImageIcon(imageNest));
                     tileList.add(tile[i][j]);
                 }
                 else if (i == hiveX && j == hiveY) {
                     hiveTile = tile[i][j];
                     hiveTile.buildHive();
-//                    System.out.println(tile[i][j] + "\n"
-//                            + "Toward the hive: + " + tile[i][j].towardTheHive() + "\n"
-//                            + "Toward the nest: " + tile[i][j].towardTheNest() + "\n"
-//                            + "Is hive: " + tile[i][j].isHive());
                     buttons[i][j].setIcon(new ImageIcon(imageHive));
                     tileList.add(tile[i][j]);
                 }
                 else if (i == j) {
-//                    System.out.println(tile[i][j] + "\n"
-//                            + "Toward the hive: + " + tile[i][j].towardTheHive() + "\n"
-//                            + "Toward the nest: " + tile[i][j].towardTheNest()
-//                    );
                     buttons[i][j].setIcon(new ImageIcon(imagePath));
                     tileList.add(tile[i][j]);
                 }
@@ -166,28 +143,11 @@ public class BeeGameGUI {
             }
         }
 
-//        for (int i = 0; i < 10; i++) {
-//            for (int j = 0; j < 10; j++) {
-//                if (buttonList.contains(buttons[i][j]) && buttonList.get(0) == buttons[i][j]) {
-//                    buttons[0][1].setIcon(new ImageIcon(imageHive));
-//                } else if (buttonList.contains(buttons[i][j]) && buttonList.get(buttonList.size() - 1) == buttons[i][j]) {
-//                    buttons[4][5].setIcon(new ImageIcon(imageNest));
-//                } else if (buttonList.contains(buttons[i][j])) {
-//                    buttons[i][j].setIcon(new ImageIcon(imagePath));
-//                } else if (tile[i][j].isNest()) {
-//                    buttons[i][j].setIcon(new ImageIcon(imageNest));
-//                } else if (tile[i][j].isHive()) {
-//                    buttons[i][j].setIcon(new ImageIcon(imageHive));
-//                }
-//            }
-//        }
-
         createUIComponents();
         frame.setSize(750, 500);
         frame.setBackground(Color.ORANGE.darker());
         frame.setVisible(true);
     }
-
 
     private void setTileInfo(String name, Tile t) {
         textAreaFood.setText("FOOD: " + food);
