@@ -1,3 +1,4 @@
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -18,12 +19,14 @@ public class BeeGameGUI {
     private JButton busyBeeButton;
     private JButton stingyBeeButton;
     private JButton tankyBeeButton;
+    private JButton takeActionButton;
+    private JButton NewSwarm;
     private JTextArea textArea1;
     private JTextArea textArea2;
     private JTextArea textAreaFood;
-    private JButton NewSwarm;
-    private JButton takeActionButton;
-    private int food = 20;
+    JButton[][] buttons;
+    int N = 10; // <-- Change to change board dimensions
+    private int food = 20; // <-- Change to change starting food amount
     private RandomBees randomBees;
     private RandomTile randomTile;
     private RandomSwarm randomSwarm;
@@ -46,22 +49,22 @@ public class BeeGameGUI {
         frame.setContentPane(mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel[][] panelHolder = new JPanel[10][10];
-        GridLayout layout = new GridLayout(10, 10);
-        layout.setHgap(10);
+        JPanel[][] panelHolder = new JPanel[N][N];
+        GridLayout layout = new GridLayout(N, N);
+        layout.setHgap(5);
         layout.setVgap(0);
         TilePanel.setBackground(Color.ORANGE.darker());
         TilePanel.setLayout(layout);
         textAreaFood.setText("FOOD: " + food);
 
-        tile = new Tile[10][10];
-        JButton[][] buttons = new JButton[10][10];
+        tile = new Tile[N][N];
+        buttons = new JButton[N][N];
 
         ArrayList<Tile> tileList = new ArrayList<>();
         ArrayList<JButton> buttonList = new ArrayList<>();
 
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
                 panelHolder[i][j] = new JPanel();
                 panelHolder[i][j].setBackground(Color.ORANGE.darker());
                 JButton b = new JButton();
@@ -78,7 +81,7 @@ public class BeeGameGUI {
 
                 buttons[i][j] = b;
                 b.setOpaque(true);
-                b.setPreferredSize(new Dimension(50, 50));
+                b.setPreferredSize(new Dimension(70, 70));
                 panelHolder[i][j].add(b);
                 int finalI = i;
                 int finalJ = j;
@@ -87,39 +90,40 @@ public class BeeGameGUI {
             }
         }
 
-        int n = 9;
 
         int hiveX = 0;
         int hiveY = 0;
-        int nestX = n;
-        int nestY = n;
+        int nestX = N - 1;
+        int nestY = N - 1;
 
-        Image imageHive = ImageIO.read(new File("src/hive.bmp"));
-        imageHive = imageHive.getScaledInstance(40, 40, 1);
 
-        Image imageNest = ImageIO.read(new File("src/nest.bmp"));
-        imageNest = imageNest.getScaledInstance(40, 40, 1);
-
-        Image imagePath = ImageIO.read(new File("src/grey.bmp"));
-        imagePath = imagePath.getScaledInstance(40, 40, 1);
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("src/");
                 if (i == nestX && j == nestY) {
                     nestTile = tile[i][j];
                     nestTile.buildNest();
-                    buttons[i][j].setIcon(new ImageIcon(imageNest));
                     tileList.add(tile[i][j]);
+                    sb.append("nest");
                 }
                 else if (i == hiveX && j == hiveY) {
                     hiveTile = tile[i][j];
                     hiveTile.buildHive();
-                    buttons[i][j].setIcon(new ImageIcon(imageHive));
                     tileList.add(tile[i][j]);
+                    sb.append("hive");
                 }
                 else if (i == j) {
-                    buttons[i][j].setIcon(new ImageIcon(imagePath));
                     tileList.add(tile[i][j]);
+                    sb.append("path");
+                }
+                sb.append(".png");
+                try {
+                    Image tileImage = ImageIO.read(new File(sb.toString()));
+                    tileImage = tileImage.getScaledInstance(70, 70, 1);
+                    buttons[i][j].setIcon(new ImageIcon(tileImage));
+                } catch (IOException ioException) {
+//                    ioException.printStackTrace();
                 }
             }
         }
@@ -157,10 +161,12 @@ public class BeeGameGUI {
                         + "\n Hive: " + t.isHive()
                         + "\n Nest: " + t.isNest()
                         + "\n On Path: " + t.isOnThePath()
-                        + "\n Bee: " + t.getBee()
+                        + "\n Bee: " + ((t.getBee() != null) ? t.getBee().getClass().getSimpleName() +
+                                        ", Health: " + t.getBee().getHealth() : null)
                         + "\n Swarm: " + t.getNumOfHornets()
                         + "\n Toward Hive: " + t.towardTheHive()
                         + "\n Toward Nest: " + t.towardTheNest()
+                        + "\n"
         );
         selected = t;
     }
@@ -177,6 +183,7 @@ public class BeeGameGUI {
                 t.addInsect(insect);
                 food -= ((BusyBee) insect).getCost();
                 textAreaFood.setText("FOOD: " + food);
+               updateTiles();
             } else textArea2.setText("Not enough food to buy BusyBee");
         } catch (Exception e) {
             System.out.println(e);
@@ -192,7 +199,8 @@ public class BeeGameGUI {
                 t.addInsect(insect);
                 food -= ((StingyBee) insect).getCost();
                 textAreaFood.setText("FOOD: " + food);
-            } else textArea2.setText("Not enough food to buy BusyBee");
+                updateTiles();
+            } else textArea2.setText("Not enough food to buy StingyBee");
         } catch (Exception e) {
             System.out.println(e);
             textArea2.setText("Cannot add StingyBee to tile");
@@ -207,21 +215,25 @@ public class BeeGameGUI {
                 t.addInsect(insect);
                 food -= ((TankyBee) insect).getCost();
                 textAreaFood.setText("FOOD: " + food);
-            } else textArea2.setText("Not enough food to buy BusyBee");
+                updateTiles();
+            } else textArea2.setText("Not enough food to buy TankyBee");
         } catch (Exception e) {
             System.out.println(e);
             textArea2.setText("Cannot add TankyBee to tile");
         }
     }
 
-    private void CreateHornetSwarm() {
+    private SwarmOfHornets CreateHornetSwarm() {
         randomSwarm = new RandomSwarm();
         try {
             swarm = randomSwarm.nextSwarm();
+            updateTiles();
+            return swarm;
         } catch (Exception e) {
             System.out.println(e);
             textArea2.setText("Cannot add Hornet Swarm to tile");
         }
+        return null;
     }
 
 
@@ -256,23 +268,65 @@ public class BeeGameGUI {
         takeActionButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (Tile[] row : tile) {
-                    for (Tile t : row){
+                int swarmCount = 0;
+                for (int i = 0; i < tile.length; i++) {
+                    for (int j = 0; j < tile[i].length; j++) {
+                        Tile t = tile[i][j];
                         if (t != null && t.getBee() != null) {
                             if (t.getBee() instanceof BusyBee) {
                                 food += t.collectFood();
-                                t.getBee().takeAction();
+                            }
+                            t.getBee().takeAction();
+                        }
+                        if (t.getNumOfHornets() > 0) {
+                            swarmCount++;
+                            for (Hornet hornet : swarm.getHornets()) {
+                                hornet.takeAction();
                             }
                         }
                     }
                 }
-                if (swarm != null) {
-                    for (Hornet hornet : swarm.getHornets()) {
-                        hornet.takeAction();
-                    }
-                }
+                if (swarmCount == 0)
+                    swarm = null;
+                updateTiles();
+                textAreaFood.setText("FOOD: " + food);
             }
         });
+    }
+
+    public void updateTiles() {
+        for (int i = 0; i < tile.length; i++) {
+            for (int j = 0; j < tile[i].length; j++) {
+                Tile t = tile[i][j];
+                StringBuilder sb = new StringBuilder();
+                sb.append("src/");
+                if (t.isNest())
+                    sb.append("nest");
+                else if (t.isHive())
+                    sb.append("hive");
+                else if (t.isOnThePath())
+                    sb.append("path");
+                else
+                    continue;
+                if (t != null && t.getBee() != null) {
+                    t.getBee().takeAction();
+                    sb.append(t.getBee().getClass().getSimpleName());
+                }
+                if (t.getNumOfHornets() > 0) {
+                    for (Hornet hornet : swarm.getHornets()) {
+                    }
+                    sb.append("Hornet");
+                }
+                sb.append(".png");
+                try {
+                    Image tileImage = ImageIO.read(new File(sb.toString()));
+                    tileImage = tileImage.getScaledInstance(70, 70, 1);
+                    buttons[i][j].setIcon(new ImageIcon(tileImage));
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        }
     }
 
 
