@@ -1,4 +1,29 @@
 # BeeGameCOMP250
+
+Fork of [Allison Mazurek's GUI](https://github.com/allisonmazurek/BeeGameCOMP250) for the Fall 2020 COMP 250 tower defense game.
+Added features:
+- Hornets that can be spawned at the nest and move toward the hive, stopping to attack bees
+- Action-taking via button press
+- Health indicator for bees without relying on toString() methods defined in Assignment1 source code
+- Icons for bees and hornets that update anytime an action is taken, including a TankyBee in pseudo-Viking armour
+
+Unresolved issues:
+- Subsequent hornet swarms spawned after the first swarm skip tiles on the way to the hive
+- Hornets stay in place when attacked by StingyBees instead of moving toward them
+- Hornets sometimes display strange behaviour when TankyBees are on the board
+
+Possible future additions:
+- Attack indicators for StingyBees
+- Random board generation
+- Predefined gameplay rounds
+
+![screenshot](https://github.com/croissantfriend/BeeGameCOMP250/blob/master/BeeGameGUI.png)
+
+Note that the source code may need some tweaking if it isn't fully compatible with your Assignment1 source code out of the box. Please open an issue if you need any help doing so, and feel free to fork and pull-request if you have any improvements or ideas!
+
+
+Allison's original README follows:
+---
 Comp250 Assignment1 Game Mcgill University Fall 2020
 
 ![screenshot](https://github.com/allisonmazurek/BeeGameCOMP250/blob/master/GUIsnapshot.jpg)

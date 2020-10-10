@@ -19,11 +19,11 @@ public class RandomTile extends Random {
         int food = food();
         if (food > 0) t.storeFood(food);
 
-        boolean hive = isHive(); //TODO: check if both a hive and nest is built on the same tile. CANNOT HAPPEN!
-        boolean nest = isNest();
-
-        if (hive) t.buildHive();
-        if (nest) t.buildNest();
+//        boolean hive = isHive(); //TODO: check if both a hive and nest is built on the same tile. CANNOT HAPPEN!
+//        boolean nest = isNest();
+//
+//        if (hive) t.buildHive();
+//        if (nest) t.buildNest();
         //TODO: check can a bee be added on a tile with a nest
         return t;
     }

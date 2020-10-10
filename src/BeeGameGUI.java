@@ -1,3 +1,4 @@
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -18,13 +19,22 @@ public class BeeGameGUI {
     private JButton busyBeeButton;
     private JButton stingyBeeButton;
     private JButton tankyBeeButton;
+    private JButton takeActionButton;
+    private JButton NewSwarm;
     private JTextArea textArea1;
     private JTextArea textArea2;
     private JTextArea textAreaFood;
-    private int food = 20;
+    JButton[][] buttons;
+    int N = 10; // <-- Change to change board dimensions
+    private int food = 20; // <-- Change to change starting food amount
     private RandomBees randomBees;
     private RandomTile randomTile;
+    private RandomSwarm randomSwarm;
+    private SwarmOfHornets swarm;
     private Tile selected;
+    private Tile[][] tile;
+    public static Tile nestTile;
+    public static Tile hiveTile;
 
 
     public BeeGameGUI() throws IOException {
@@ -39,22 +49,22 @@ public class BeeGameGUI {
         frame.setContentPane(mainPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel[][] panelHolder = new JPanel[10][10];
-        GridLayout layout = new GridLayout(10, 10);
-        layout.setHgap(10);
+        JPanel[][] panelHolder = new JPanel[N][N];
+        GridLayout layout = new GridLayout(N, N);
+        layout.setHgap(5);
         layout.setVgap(0);
         TilePanel.setBackground(Color.ORANGE.darker());
         TilePanel.setLayout(layout);
         textAreaFood.setText("FOOD: " + food);
 
-        Tile[][] tile = new Tile[10][10];
-        JButton[][] buttons = new JButton[10][10];
+        tile = new Tile[N][N];
+        buttons = new JButton[N][N];
 
         ArrayList<Tile> tileList = new ArrayList<>();
         ArrayList<JButton> buttonList = new ArrayList<>();
 
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
                 panelHolder[i][j] = new JPanel();
                 panelHolder[i][j].setBackground(Color.ORANGE.darker());
                 JButton b = new JButton();
@@ -71,7 +81,7 @@ public class BeeGameGUI {
 
                 buttons[i][j] = b;
                 b.setOpaque(true);
-                b.setPreferredSize(new Dimension(50, 50));
+                b.setPreferredSize(new Dimension(70, 70));
                 panelHolder[i][j].add(b);
                 int finalI = i;
                 int finalJ = j;
@@ -80,58 +90,60 @@ public class BeeGameGUI {
             }
         }
 
-        int nestX = 0;
-        int nestY = 1;
-        int hiveX = 4;
-        int hiveY = 5;
 
-        Tile nestTile = tile[0][1];
-        nestTile.buildNest();
-        Tile hiveTile = tile[4][5];
-        hiveTile.buildHive();
+        int hiveX = 0;
+        int hiveY = 0;
+        int nestX = N - 1;
+        int nestY = N - 1;
 
-        for (int i = 0; i <= 4; i++) {
-            tileList.add(tile[i][nestY]);
-            buttonList.add(buttons[i][nestY]);
 
-        }
-        for (int i = 1 + 1; i <= 5; i++) {
-            tileList.add(tile[4][i]);
-            buttonList.add(buttons[4][i]);
-        }
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                for (int k = 0; k < tileList.size() - 1; k++) {
-                    if (tileList.contains(tile[i][j]))
-                        tile[i][j].createPath(tileList.get(k), tileList.get(k + 1));
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("src/");
+                if (i == nestX && j == nestY) {
+                    nestTile = tile[i][j];
+                    nestTile.buildNest();
+                    tileList.add(tile[i][j]);
+                    sb.append("nest");
+                }
+                else if (i == hiveX && j == hiveY) {
+                    hiveTile = tile[i][j];
+                    hiveTile.buildHive();
+                    tileList.add(tile[i][j]);
+                    sb.append("hive");
+                }
+                else if (i == j) {
+                    tileList.add(tile[i][j]);
+                    sb.append("path");
+                }
+                sb.append(".png");
+                try {
+                    Image tileImage = ImageIO.read(new File(sb.toString()));
+                    tileImage = tileImage.getScaledInstance(70, 70, 1);
+                    buttons[i][j].setIcon(new ImageIcon(tileImage));
+                } catch (IOException ioException) {
+//                    ioException.printStackTrace();
                 }
             }
         }
 
-
-        Image imageHive = ImageIO.read(new File("src/hive.bmp"));
-        imageHive = imageHive.getScaledInstance(40, 40, 1);
-
-        Image imageNest = ImageIO.read(new File("src/nest.bmp"));
-        imageNest = imageNest.getScaledInstance(40, 40, 1);
-
-        Image imagePath = ImageIO.read(new File("src/grey.bmp"));
-        imagePath = imagePath.getScaledInstance(40, 40, 1);
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                if (buttonList.contains(buttons[i][j]) && buttonList.get(0) == buttons[i][j]) {
-                    buttons[0][1].setIcon(new ImageIcon(imageHive));
-                } else if (buttonList.contains(buttons[i][j]) && buttonList.get(buttonList.size() - 1) == buttons[i][j]) {
-                    buttons[4][5].setIcon(new ImageIcon(imageNest));
-                } else if (buttonList.contains(buttons[i][j])) {
-                    buttons[i][j].setIcon(new ImageIcon(imagePath));
-                } else if (tile[i][j].isNest()) {
-                    buttons[i][j].setIcon(new ImageIcon(imageNest));
-                } else if (tile[i][j].isHive()) {
-                    buttons[i][j].setIcon(new ImageIcon(imageHive));
+        int initial = 1;
+        int m = tileList.size() - 1;
+        for (int k = initial; k < tileList.size() - 1; k++) {
+            if (tileList.get(initial - 1).isHive()) {
+                if (k == initial) {
+                    tileList.get(k - 1).createPath(null, tileList.get(k));
+                    tileList.get(m).createPath(tileList.get(m - 1), null);
                 }
+                tileList.get(k).createPath(tileList.get(k - 1), tileList.get(k + 1));
+            }
+            else if (tileList.get(initial - 1).isNest()) {
+                if (k == initial) {
+                    tileList.get(k - 1).createPath(tileList.get(k), null);
+                    tileList.get(m).createPath(null, tileList.get(m - 1));
+                }
+                tileList.get(k).createPath(tileList.get(k + 1), tileList.get(k - 1));
             }
         }
 
@@ -141,11 +153,21 @@ public class BeeGameGUI {
         frame.setVisible(true);
     }
 
-
     private void setTileInfo(String name, Tile t) {
         textAreaFood.setText("FOOD: " + food);
         textArea2.setText("");
-        textArea1.setText(t.toString());
+        textArea1.setText(
+                t.toString()
+                        + "\n Hive: " + t.isHive()
+                        + "\n Nest: " + t.isNest()
+                        + "\n On Path: " + t.isOnThePath()
+                        + "\n Bee: " + ((t.getBee() != null) ? t.getBee().getClass().getSimpleName() +
+                                        ", Health: " + t.getBee().getHealth() : null)
+                        + "\n Swarm: " + t.getNumOfHornets()
+                        + "\n Toward Hive: " + t.towardTheHive()
+                        + "\n Toward Nest: " + t.towardTheNest()
+                        + "\n"
+        );
         selected = t;
     }
 
@@ -161,8 +183,10 @@ public class BeeGameGUI {
                 t.addInsect(insect);
                 food -= ((BusyBee) insect).getCost();
                 textAreaFood.setText("FOOD: " + food);
+               updateTiles();
             } else textArea2.setText("Not enough food to buy BusyBee");
         } catch (Exception e) {
+            System.out.println(e);
             textArea2.setText("Cannot add BusyBee to tile");
         }
     }
@@ -175,25 +199,41 @@ public class BeeGameGUI {
                 t.addInsect(insect);
                 food -= ((StingyBee) insect).getCost();
                 textAreaFood.setText("FOOD: " + food);
-            } else textArea2.setText("Not enough food to buy BusyBee");
+                updateTiles();
+            } else textArea2.setText("Not enough food to buy StingyBee");
         } catch (Exception e) {
+            System.out.println(e);
             textArea2.setText("Cannot add StingyBee to tile");
         }
     }
 
     private void CreateTankyBee(Tile t) {
         randomBees = new RandomBees();
-
         try {
             TankyBee insect = randomBees.nextTankyBee(t);
             if (food > ((TankyBee) insect).getCost()) {
                 t.addInsect(insect);
                 food -= ((TankyBee) insect).getCost();
                 textAreaFood.setText("FOOD: " + food);
-            } else textArea2.setText("Not enough food to buy BusyBee");
+                updateTiles();
+            } else textArea2.setText("Not enough food to buy TankyBee");
         } catch (Exception e) {
+            System.out.println(e);
             textArea2.setText("Cannot add TankyBee to tile");
         }
+    }
+
+    private SwarmOfHornets CreateHornetSwarm() {
+        randomSwarm = new RandomSwarm();
+        try {
+            swarm = randomSwarm.nextSwarm();
+            updateTiles();
+            return swarm;
+        } catch (Exception e) {
+            System.out.println(e);
+            textArea2.setText("Cannot add Hornet Swarm to tile");
+        }
+        return null;
     }
 
 
@@ -219,6 +259,74 @@ public class BeeGameGUI {
                 textArea1.setText(selected.toString());
             }
         });
+        NewSwarm.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                CreateHornetSwarm();
+            }
+        });
+        takeActionButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int swarmCount = 0;
+                for (int i = 0; i < tile.length; i++) {
+                    for (int j = 0; j < tile[i].length; j++) {
+                        Tile t = tile[i][j];
+                        if (t != null && t.getBee() != null) {
+                            if (t.getBee() instanceof BusyBee) {
+                                food += t.collectFood();
+                            }
+                            t.getBee().takeAction();
+                        }
+                        if (t.getNumOfHornets() > 0) {
+                            swarmCount++;
+                            for (Hornet hornet : swarm.getHornets()) {
+                                hornet.takeAction();
+                            }
+                        }
+                    }
+                }
+                if (swarmCount == 0)
+                    swarm = null;
+                updateTiles();
+                textAreaFood.setText("FOOD: " + food);
+            }
+        });
+    }
+
+    public void updateTiles() {
+        for (int i = 0; i < tile.length; i++) {
+            for (int j = 0; j < tile[i].length; j++) {
+                Tile t = tile[i][j];
+                StringBuilder sb = new StringBuilder();
+                sb.append("src/");
+                if (t.isNest())
+                    sb.append("nest");
+                else if (t.isHive())
+                    sb.append("hive");
+                else if (t.isOnThePath())
+                    sb.append("path");
+                else
+                    continue;
+                if (t != null && t.getBee() != null) {
+                    t.getBee().takeAction();
+                    sb.append(t.getBee().getClass().getSimpleName());
+                }
+                if (t.getNumOfHornets() > 0) {
+                    for (Hornet hornet : swarm.getHornets()) {
+                    }
+                    sb.append("Hornet");
+                }
+                sb.append(".png");
+                try {
+                    Image tileImage = ImageIO.read(new File(sb.toString()));
+                    tileImage = tileImage.getScaledInstance(70, 70, 1);
+                    buttons[i][j].setIcon(new ImageIcon(tileImage));
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        }
     }
 
 
@@ -265,6 +373,9 @@ public class BeeGameGUI {
         tankyBeeButton = new JButton();
         tankyBeeButton.setText("TankyBee");
         BeeButtonPanel.add(tankyBeeButton, new com.intellij.uiDesigner.core.GridConstraints(2, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_EAST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        NewSwarm = new JButton();
+        NewSwarm.setText(" Next Swarm ");
+        BeeButtonPanel.add(NewSwarm, new com.intellij.uiDesigner.core.GridConstraints(3, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_EAST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new BorderLayout(0, 0));
         BeeButtonPanel.add(panel2, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));

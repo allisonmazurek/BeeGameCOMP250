@@ -34,19 +34,12 @@
                   <text value=" BusyBee "/>
                 </properties>
               </component>
-              <component id="4cec6" class="javax.swing.JButton" binding="stingyBeeButton" default-binding="true">
-                <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <text value="StingyBee"/>
-                </properties>
-              </component>
               <component id="e1511" class="javax.swing.JButton" binding="tankyBeeButton" default-binding="true">
                 <constraints>
                   <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
+                  <hideActionText value="true"/>
                   <text value="TankyBee"/>
                 </properties>
               </component>
@@ -63,6 +56,30 @@
                   </component>
                 </children>
               </grid>
+              <component id="4cec6" class="javax.swing.JButton" binding="stingyBeeButton" default-binding="true">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="StingyBee"/>
+                </properties>
+              </component>
+              <component id="a4df5" class="javax.swing.JButton" binding="NewSwarm">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="New Swarm"/>
+                </properties>
+              </component>
+              <component id="a2aa4" class="javax.swing.JButton" binding="takeActionButton">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="TakeAction"/>
+                </properties>
+              </component>
             </children>
           </grid>
           <grid id="40c04" layout-manager="BorderLayout" hgap="0" vgap="0">
